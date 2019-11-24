@@ -6,13 +6,13 @@ int8_t X0, X2, X4, X6, X8, X10 = 0;
 uint8_t X1, X3, X5, X7, X9, X11 = 0;
 byte gyro_mask = B00000000; 
 
-int16_t accel_tempx = 0;
-int16_t accel_tempy = 0;
-int16_t accel_tempz = 0;
+float accel_tempx = 0;
+float accel_tempy = 0;
+float accel_tempz = 0;
 
-int16_t gyro_tempx = 0;
-int16_t gyro_tempy = 0;
-int16_t gyro_tempz = 0;
+float gyro_tempx = 0;
+float gyro_tempy = 0;
+float gyro_tempz = 0;
 
 #define GYRO_CONFIG 0x1B //Hex address of gyro config register
 
@@ -42,6 +42,14 @@ int16_t gyro_tempz = 0;
 void setup() {
   Wire.begin(); //Start the I2C communication capability
   Serial.begin(9600); //Start serial comms between pc and Arduino board
+
+  Wire.beginTransmission(IMU_Address);
+
+  Wire.write(GYRO_CONFIG);
+
+  Wire.write(gyro_mask);
+
+  Wire.endTransmission();  
 }
 
 void loop() {
@@ -55,8 +63,7 @@ void loop() {
   Wire.requestFrom(IMU_Address, 6);
 
   if(Wire.available() <= 6)
-  {
-    
+  { 
     X0 = Wire.read();
     X1 = Wire.read();
 
@@ -65,7 +72,6 @@ void loop() {
 
     X4 = Wire.read();
     X5 = Wire.read();
-    
   }
 
   accel_tempx = X0 << 8 | X1;
@@ -91,25 +97,24 @@ void loop() {
 
     X10 = Wire.read();
     X11 = Wire.read();
-    
   }
 
   gyro_tempx = X6 << 8 | X7;
   gyro_tempy = X8 << 8 | X9;
   gyro_tempz = X10 << 8 | X11; 
 
-  Serial.print(accel_tempx);
+  Serial.print(accel_tempx/16384);
   Serial.print("\t");
-  Serial.print(accel_tempy);
+  Serial.print(accel_tempy/16384);
   Serial.print("\t");
-  Serial.print(accel_tempz);
+  Serial.print(accel_tempz/16384);
   Serial.print("\t");
 
-  Serial.print(gyro_tempx/16.4);
+  Serial.print(gyro_tempx/131);
   Serial.print("\t");
-  Serial.print(gyro_tempy/16.4);
+  Serial.print(gyro_tempy/131);
   Serial.print("\t");
-  Serial.println(gyro_tempz/16.4);
+  Serial.println(gyro_tempz/131);
 
   delay(100);
 
